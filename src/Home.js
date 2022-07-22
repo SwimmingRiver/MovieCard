@@ -3,6 +3,8 @@ import {useQuery} from 'react-query';
 import { makeImgPath } from './util';
 import styled from 'styled-components';
 import { Draggable, Droppable } from "react-beautiful-dnd";
+import { useContext, React } from 'react';
+import { BoxContext } from './context';
 
 const Card = styled.div`  
     background-image: url(${(props)=>props.bgPhoto});
@@ -13,8 +15,8 @@ const Card = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    height: 40vh;
-    width: 15vw;
+    height: 10vh;
+    width: 18vw;
     box-shadow: 5px 5px 5px 5px black;
     position: absolute;
 `;
@@ -23,6 +25,7 @@ const Box =styled.div`
     border-radius: 2em;
     height: 30vh;
     width: 30vw;
+    text-align: center;
 `
 const CardTitle= styled.h1`
     color: white;
@@ -46,8 +49,9 @@ const PartSection = styled.div`
 `;
 
 function Home(){
+    const {boxState,setBoxState}=useContext(BoxContext);
  const {data,isLoading}=useQuery(["movies","nowPlaying"],getMovies)
-    console.log(data,isLoading);
+    // console.log(data,isLoading);
  return(
         <div>{isLoading?
             <h1>Loading...</h1>: (
@@ -57,25 +61,53 @@ function Home(){
             <AllSection>
              
                     <PartSection>
-                       <Droppable draggableId='Like'>{
-                       (provided)=><Box ref={provided.innerRef} {...provided.droppableProps}>LIke</Box>}
+                       <Droppable droppableId='Like'>{
+                       (provided)=><Box ref={provided.innerRef} {...provided.droppableProps}>
+                        Like
+                        {boxState['Like'].map( (item,index)=><Draggable draggableId={item} key={index} index={index}>  
+                        {(provided)=><Card 
+                                ref={provided.innerRef} 
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        bgPhoto={makeImgPath(data?.results[item].backdrop_path||"")}
+                        >
+                    <CardTitle>{data?.results[item].title}</CardTitle>
+            {/* <CardText>{data?.results[index].overview}</CardText> */}
+        </Card>}
+        </Draggable>)}
+                        </Box>
+                       }
                        </Droppable>
-                       <Droppable draggableId='DisLike'>{(provided)=> <Box ref={provided.innerRef} {...provided.droppableProps}>
-                        DisLIke</Box>}
-                        </Droppable>
+                       <Droppable droppableId='DisLike'>{
+                       (provided)=><Box ref={provided.innerRef} {...provided.droppableProps}>
+                        DisLike
+                        {boxState['DisLike'].map( (item,index)=><Draggable draggableId={item} key={index} index={index}>  
+                        {(provided)=><Card 
+                                ref={provided.innerRef} 
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        bgPhoto={makeImgPath(data?.results[item].backdrop_path||"")}
+                        >
+                    <CardTitle>{data?.results[item].title}</CardTitle>
+            {/* <CardText>{data?.results[item].overview}</CardText> */}
+        </Card>}
+        </Draggable>)}
+                        </Box>
+                       }
+                       </Droppable>
                     </PartSection>
                 
   
     <PartSection>
         <Droppable droppableId='Box'>
         {(provided)=><Box ref={provided.innerRef} {...provided.draggableProps}>
-       {["0","1","2","3","4","5","6"].map( (item,index)=><Draggable draggableId={item}>  
+       {boxState['Deck'].map( (item,index)=><Draggable draggableId={item} key={index} index={index}>  
               {(provided)=><Card 
               ref={provided.innerRef} 
               {...provided.draggableProps}
                {...provided.dragHandleProps}
-                bgPhoto={makeImgPath(data?.results[index].backdrop_path||"")}>
-            <CardTitle>{data?.results[index].title}</CardTitle>
+                bgPhoto={makeImgPath(data?.results[item].backdrop_path||"")}>
+            <CardTitle>{data?.results[item].title}</CardTitle>
             {/* <CardText>{data?.results[index].overview}</CardText> */}
         </Card>}
         </Draggable>)}
